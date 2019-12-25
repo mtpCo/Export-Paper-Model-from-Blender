@@ -12,3 +12,7 @@ Features:
  * Interactive recalculation in Edit Mode
 
 Documentation is available on the [github.io site](http://addam.github.io/Export-Paper-Model-from-Blender).
+
+# To install the custom version
+1) Rename io_export_paper_model.py in order to not conflict with the original addon.
+2) Install in Blender via:  Edit > Preferences... > Install...

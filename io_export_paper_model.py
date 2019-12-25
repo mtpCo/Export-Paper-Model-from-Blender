@@ -10,7 +10,7 @@
 # During the unfold process, the mesh is mirrored into a 2D structure: UVFace, UVEdge, UVVertex.
 
 bl_info = {
-    "name": "Export Paper Model",
+    "name": "Export Paper Model CUSTOM",
     "author": "Addam Dominec",
     "version": (1, 1),
     "blender": (2, 80, 0),
@@ -579,7 +579,7 @@ class Mesh:
                 "Either downscale the model or find and split that island manually.\n"
                 "Export failed, sorry.")
         # sort islands by their diagonal... just a guess
-        remaining_islands = sorted(self.islands, reverse=True, key=lambda island: island.bounding_box.length_squared)
+        remaining_islands = sorted(self.islands, reverse=True, key=lambda island: (-island.material_index, island.bounding_box.length_squared))
         page_num = 1  # TODO delete me
 
         while remaining_islands:
@@ -589,6 +589,8 @@ class Mesh:
             occupied_cache = set()
             stops_x, stops_y = [0], [0]
             for island in remaining_islands:
+                if len(page.islands) > 0 and island.material_index != page.islands[0].material_index:
+                    continue
                 try_emplace(island, page.islands, stops_x, stops_y, occupied_cache)
                 # if overwhelmed with stops, drop a quarter of them
                 if len(stops_x)**2 > 4 * len(self.islands) + 100:
@@ -747,7 +749,8 @@ class Island:
         'image_path', 'embedded_image',
         'number', 'label', 'abbreviation', 'title',
         'has_safe_geometry', 'is_inside_out',
-        'sticker_numbering')
+        'sticker_numbering',
+        'material_index')
 
     def __init__(self, mesh, face, matrix, normal_matrix):
         """Create an Island from a single Face"""
@@ -773,6 +776,8 @@ class Island:
         self.faces[face] = uvface
         # UVEdges on the boundary
         self.boundary = list(self.edges.values())
+
+        self.material_index = face.material_index
     
     def add_marker(self, marker):
         self.fake_vertices.extend(marker.bounds)
